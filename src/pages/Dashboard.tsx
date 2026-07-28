@@ -7,17 +7,11 @@ import {
 import { Card, Col, Row, Statistic, Table, Tag, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import StatusTag from '../components/StatusTag';
 import { useOrderStore } from '../store/orderStore';
 import { useProductStore } from '../store/productStore';
 import type { Order } from '../types';
-
-const STATUS_COLORS: Record<Order['status'], string> = {
-  pending: 'gold',
-  processing: 'blue',
-  shipped: 'geekblue',
-  delivered: 'green',
-  cancelled: 'red',
-};
+import { ORDER_STATUS_COLORS } from '../utils/constants';
 
 export default function Dashboard() {
   const products = useProductStore((s) => s.products);
@@ -109,7 +103,7 @@ export default function Dashboard() {
                   title: 'Status',
                   dataIndex: 'status',
                   render: (status: Order['status']) => (
-                    <Tag color={STATUS_COLORS[status]}>{status}</Tag>
+                    <StatusTag value={status} colorMap={ORDER_STATUS_COLORS} />
                   ),
                 },
               ]}

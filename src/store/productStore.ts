@@ -1,13 +1,6 @@
 import { create } from 'zustand';
 import { mockProducts } from '../data/mockData';
-import type { Product } from '../types';
-
-interface ProductStore {
-  products: Product[];
-  addProduct: (product: Omit<Product, 'id' | 'updatedAt'>) => void;
-  updateProduct: (id: string, product: Omit<Product, 'id' | 'updatedAt'>) => void;
-  deleteProduct: (id: string) => void;
-}
+import type { ProductStore } from '../types';
 
 let nextId = mockProducts.length + 1;
 

@@ -1,5 +1,5 @@
 import type { Order, OrderItem, OrderStatus, Product } from '../types';
-import { PRODUCT_CATEGORIES } from '../types';
+import { PRODUCT_CATEGORIES } from '../utils/constants';
 
 function seededRandom(seed: number) {
   let value = seed;

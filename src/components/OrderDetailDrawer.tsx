@@ -1,21 +1,8 @@
-import { Button, Descriptions, Drawer, Space, Table, Tag, Typography } from 'antd';
+import { Button, Descriptions, Drawer, Space, Table, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { ORDER_STATUS_FLOW, type Order, type OrderStatus } from '../types';
-
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  pending: 'gold',
-  processing: 'blue',
-  shipped: 'geekblue',
-  delivered: 'green',
-  cancelled: 'red',
-};
-
-interface OrderDetailDrawerProps {
-  open: boolean;
-  order: Order | null;
-  onClose: () => void;
-  onSetStatus: (id: string, status: OrderStatus) => void;
-}
+import type { OrderDetailDrawerProps } from '../types';
+import { ORDER_STATUS_COLORS, ORDER_STATUS_FLOW } from '../utils/constants';
+import StatusTag from './StatusTag';
 
 export default function OrderDetailDrawer({
   open,
@@ -38,7 +25,7 @@ export default function OrderDetailDrawer({
       open={open}
       onClose={onClose}
       width={480}
-      extra={<Tag color={STATUS_COLORS[order.status]}>{order.status}</Tag>}
+      extra={<StatusTag value={order.status} colorMap={ORDER_STATUS_COLORS} />}
     >
       <Descriptions column={1} size="small" bordered>
         <Descriptions.Item label="Customer">{order.customer}</Descriptions.Item>

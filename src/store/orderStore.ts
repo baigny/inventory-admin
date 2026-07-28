@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import { mockOrders } from '../data/mockData';
-import type { Order, OrderStatus } from '../types';
-
-interface OrderStore {
-  orders: Order[];
-  setOrderStatus: (id: string, status: OrderStatus) => void;
-}
+import type { OrderStore } from '../types';
 
 export const useOrderStore = create<OrderStore>((set) => ({
   orders: mockOrders,

@@ -1,24 +1,7 @@
 import { Button, Drawer, Form, Input, InputNumber, Select, Space, Switch } from 'antd';
 import { useEffect } from 'react';
-import { PRODUCT_CATEGORIES, type Product } from '../types';
-
-interface ProductFormValues {
-  sku: string;
-  name: string;
-  category: string;
-  price: number;
-  cost: number;
-  stock: number;
-  reorderLevel: number;
-  active: boolean;
-}
-
-interface ProductFormDrawerProps {
-  open: boolean;
-  product: Product | null;
-  onClose: () => void;
-  onSubmit: (values: Omit<Product, 'id' | 'updatedAt'>) => void;
-}
+import type { ProductFormDrawerProps, ProductFormValues } from '../types';
+import { PRODUCT_CATEGORIES } from '../utils/constants';
 
 export default function ProductFormDrawer({
   open,
