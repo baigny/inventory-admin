@@ -1,32 +1,36 @@
-# React + TypeScript + Vite
+# Inventory Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Inventory and order management admin panel. Products CRUD, orders with status workflow, dashboard.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19, TypeScript (strict), Vite
+- Ant Design (UI components)
+- AG Grid Community (data grids: custom filters, inline editing, column-state persistence)
+- Zustand (state)
+- Vitest + Testing Library (tests)
 
-## React Compiler
+Data is mock, in-memory only (`src/data/mockData.ts`). No backend, resets on reload. Grid column layout/filter/sort state persists to `localStorage`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Structure
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+  components/   reusable UI components (StatusTag, drawers, grid/)
+  pages/        route-level views (Dashboard, Products, Orders)
+  store/        zustand stores
+  types/        all interfaces/types (barrel export via index.ts)
+  utils/        constants.ts, gridColumnState.ts
+  data/         mock data
+  test/         unit and component tests
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Scripts
+
+```
+npm run dev        # start dev server
+npm run build       # typecheck + production build
+npm run lint        # oxlint
+npm test            # run tests once
+npm run test:watch  # run tests in watch mode
+```
