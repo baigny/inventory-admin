@@ -9,6 +9,7 @@ import type {
 import { AgGridReact } from 'ag-grid-react';
 import { Button, Input, Popconfirm, Space, Tag } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
+import '../agGridSetup';
 import CheckboxSetFilter from '../components/grid/CheckboxSetFilter';
 import ProductFormDrawer from '../components/ProductFormDrawer';
 import StatusTag from '../components/StatusTag';

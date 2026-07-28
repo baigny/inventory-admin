@@ -3,6 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Input, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useMemo, useState } from 'react';
+import '../agGridSetup';
 import CheckboxSetFilter from '../components/grid/CheckboxSetFilter';
 import OrderDetailDrawer from '../components/OrderDetailDrawer';
 import StatusTag from '../components/StatusTag';
