@@ -1,63 +1,55 @@
-import type { ColDef, ICellRendererParams, ValueFormatterParams } from 'ag-grid-community';
+import type { ColDef, GridReadyEvent, ICellRendererParams, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { Input, Select, Space, Tag } from 'antd';
+import { Input, Space } from 'antd';
 import dayjs from 'dayjs';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import CheckboxSetFilter from '../components/grid/CheckboxSetFilter';
 import OrderDetailDrawer from '../components/OrderDetailDrawer';
+import StatusTag from '../components/StatusTag';
 import { useOrderStore } from '../store/orderStore';
 import { appAgGridTheme } from '../theme/agGridTheme';
 import type { Order, OrderStatus } from '../types';
-
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  pending: 'gold',
-  processing: 'blue',
-  shipped: 'geekblue',
-  delivered: 'green',
-  cancelled: 'red',
-};
+import { GRID_STATE_KEYS, ORDER_STATUS_COLORS, ORDER_STATUSES } from '../utils/constants';
+import { restoreGridState, saveGridState } from '../utils/gridColumnState';
 
 function StatusCell({ value }: ICellRendererParams<Order, OrderStatus>) {
   if (!value) return null;
-  return <Tag color={STATUS_COLORS[value]}>{value}</Tag>;
+  return <StatusTag value={value} colorMap={ORDER_STATUS_COLORS} />;
 }
 
 export default function Orders() {
   const orders = useOrderStore((s) => s.orders);
   const setOrderStatus = useOrderStore((s) => s.setOrderStatus);
 
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<OrderStatus | undefined>(undefined);
+  const [quickFilter, setQuickFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const rowData = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return orders.filter((o) => {
-      if (status && o.status !== status) return false;
-      if (
-        term &&
-        !o.orderNumber.toLowerCase().includes(term) &&
-        !o.customer.toLowerCase().includes(term)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [orders, search, status]);
+  const handleGridReady = useCallback((event: GridReadyEvent) => {
+    restoreGridState(GRID_STATE_KEYS.orders, event.api);
+  }, []);
+
+  const persistState = useCallback((event: { api: GridReadyEvent['api'] }) => {
+    saveGridState(GRID_STATE_KEYS.orders, event.api);
+  }, []);
 
   const columnDefs = useMemo<ColDef<Order>[]>(
     () => [
-      { field: 'orderNumber', headerName: 'Order #', width: 130, pinned: 'left' },
-      { field: 'customer', headerName: 'Customer', flex: 1, minWidth: 160 },
+      { field: 'orderNumber', headerName: 'Order #', width: 130, pinned: 'left', floatingFilter: true },
+      { field: 'customer', headerName: 'Customer', flex: 1, minWidth: 160, floatingFilter: true },
       {
         headerName: 'Items',
         width: 90,
+        filter: false,
         valueGetter: (p) => p.data?.items.length ?? 0,
       },
       {
         field: 'total',
         headerName: 'Total',
         width: 110,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+        enableCellChangeFlash: true,
         valueFormatter: (p: ValueFormatterParams<Order, number>) =>
           p.value != null ? `$${p.value.toFixed(2)}` : '',
       },
@@ -66,11 +58,15 @@ export default function Orders() {
         headerName: 'Status',
         width: 130,
         cellRenderer: StatusCell,
+        filter: CheckboxSetFilter,
+        filterParams: { values: ORDER_STATUSES },
+        enableCellChangeFlash: true,
       },
       {
         field: 'createdAt',
         headerName: 'Created',
         width: 160,
+        filter: false,
         valueFormatter: (p: ValueFormatterParams<Order, string>) =>
           p.value ? dayjs(p.value).format('MMM D, YYYY') : '',
       },
@@ -85,36 +81,28 @@ export default function Orders() {
           placeholder="Search order # or customer"
           allowClear
           style={{ width: 240 }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Select
-          placeholder="Status"
-          allowClear
-          style={{ width: 160 }}
-          value={status}
-          onChange={setStatus}
-          options={[
-            { label: 'Pending', value: 'pending' },
-            { label: 'Processing', value: 'processing' },
-            { label: 'Shipped', value: 'shipped' },
-            { label: 'Delivered', value: 'delivered' },
-            { label: 'Cancelled', value: 'cancelled' },
-          ]}
+          value={quickFilter}
+          onChange={(e) => setQuickFilter(e.target.value)}
         />
       </Space>
 
       <div style={{ flex: 1, minHeight: 0 }}>
         <AgGridReact<Order>
           theme={appAgGridTheme}
-          rowData={rowData}
+          rowData={orders}
           columnDefs={columnDefs}
-          defaultColDef={{ sortable: true, resizable: true }}
+          defaultColDef={{ sortable: true, resizable: true, filter: true }}
+          quickFilterText={quickFilter}
           pagination
           paginationPageSize={20}
           paginationPageSizeSelector={[20, 50, 100]}
           animateRows
           getRowId={(p) => p.data.id}
+          onGridReady={handleGridReady}
+          onColumnMoved={(e) => e.finished && persistState(e)}
+          onColumnResized={(e) => e.finished && persistState(e)}
+          onSortChanged={persistState}
+          onFilterChanged={persistState}
           onRowClicked={(e) => {
             if (!e.data) return;
             setSelectedOrder(e.data);
